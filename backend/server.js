@@ -1,10 +1,17 @@
 const express = require("express");
 const mongoose = require("mongoose");
+var bodyParser = require("body-parser");
 const app = express();
 const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
 app.use(cors());
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
 // 1er méthode :
 // const useRoutes = require("./routes/user");
 // app.use("/", useRoutes);
@@ -16,6 +23,7 @@ readdirSync("./routes").map((r) => app.use("/", require("./routes/" + r)));
 mongoose
   .connect(process.env.DATABASE_URL, {
     useNewUrlParser: true,
+    //useUnifiedTopology: true,
   })
   .then(() => {
     console.log("Database connected succesfully");
