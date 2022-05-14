@@ -10,3 +10,9 @@ const auth = new OAuth2({
   CLIENT_SECRET,
   oAuthLink,
 });
+
+exports.sendVerificationEmail = (email, name, url) => {
+  auth.setCredentials({
+    refresh_token: MAILING_REFRESH_TOKEN,
+  });
+};
