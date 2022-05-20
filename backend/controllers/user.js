@@ -5,12 +5,13 @@ const {
   validateUsername,
 } = require("../helpers/validations");
 const bcrypt = require("bcrypt");
+const { generateToken } = require("../helpers/token");
+const { sendVerificationEmail } = require("../helpers/mailer");
 exports.register = async (req, res) => {
   try {
     const {
       first_name,
       last_name,
-      username,
       email,
       password,
       bDay,
@@ -60,7 +61,26 @@ exports.register = async (req, res) => {
       bYear,
       gender,
     }).save();
-    res.json(user);
+    // res.json(user);
+    const emailVerificationToken = generateToken(
+      { id: user._id.toString() },
+      "30m"
+    );
+
+    const url = `${process.env.BASE_URL}/activate/${emailVerificationToken}`;
+
+    sendVerificationEmail(user.email, user.first_name, url);
+    const token = generateToken({ id: user._id.toString() }, "7d");
+    res.send({
+      id: user._id,
+      username: user.username,
+      picture: user.picture,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      token: token,
+      verified: user.verified,
+      message: "Inscription réussie,SVP activez votre email",
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
