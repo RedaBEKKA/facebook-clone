@@ -28,7 +28,7 @@ mongoose
   .then(() => {
     console.log("Database connected succesfully");
   })
-  .catch((err) => console.log(err));
+  .catch((err) => console.log("err"));
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {

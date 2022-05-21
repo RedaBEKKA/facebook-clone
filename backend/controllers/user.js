@@ -1,4 +1,6 @@
 const User = require("../models/User");
+let jwt = require("jsonwebtoken");
+
 const {
   validateEmail,
   validationLength,
@@ -83,5 +85,52 @@ exports.register = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+exports.activateAccount = async (req, res) => {
+  const { token } = req.body;
+  const user = jwt.verify(token, process.env.TOKEN_SECRET); //decode the token
+  console.log(user, "user");
+  const check = await User.findById(user.id);
+  if (check.verified) {
+    return res.status(400).json({ message: "cet compte est déja activé" });
+  } else {
+    await User.findByIdAndUpdate(user.id, { verified: true });
+    return res
+      .status(200)
+      .json({ message: "Le compte a été activé avec succés" });
+  }
+};
+
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    console.log(user, " utilisateur");
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "Cet adresse email n'est pas correcte" });
+    }
+    const check = await bcrypt.compare(password, user.password);
+    if (!check) {
+      return res
+        .status(400)
+        .json({ message: "Invalide mot de passe , réeassayez SVP" });
+    }
+    const token = generateToken({ id: user._id.toString() }, "7d");
+    res.send({
+      id: user._id,
+      username: user.username,
+      picture: user.picture,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      token: token,
+      verified: user.verified,
+      message: "Connexion reussie",
+    });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
   }
 };
