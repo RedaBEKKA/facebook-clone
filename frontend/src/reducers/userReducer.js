@@ -6,6 +6,6 @@ export default function userReducer(state = null, action) {
       return action.payload;
 
     default:
-      break;
+      return state;
   }
 }
